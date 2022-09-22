@@ -73,7 +73,7 @@ while :; do
 				# ssh -R 80:$req_localip:80 localhost.run 
 				nohup ssh -R 80:localhost:20211 localhost.run &
 				lhr_pid=$!
-				lhr_url= $(more nohup.out | awk 'END{print}')
+				lhr_url=$(awk -F ', ' 'END{print $2}' nohup.out)
 				[[ $debug == true ]] && echo "url: "$lhr_url
 				[[ $debug == true ]] && echo "pid: "$lhr_pid
 				mosquitto_pub -h $mqtt_server_url -p $mqtt_server_port -t $mqtt_topic -m {"lhr_url":"$lhr_url"}
