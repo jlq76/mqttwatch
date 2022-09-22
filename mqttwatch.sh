@@ -28,7 +28,10 @@ while getopts ":hv" option; do
 done
 
 # ============ MAIN ============
+#source the config file
 . ./mqttwatch.config
+
+#loop on the mqtt topic
 while :; do
     #read message from topic and disconnect once read [-C 1]
 	msg=$(mosquitto_sub -h $mqtt_server_url -p $mqtt_server_port  -C 1 -t $mqtt_topic)
@@ -67,13 +70,15 @@ while :; do
 				#ssh options -f = fork in background, -N = run no command
 				#when using fN however, the url is not returned in the variable
 				#if not using it the ssh remains in foreground and block the script
-				lhr_url=$(ssh -fN -R 80:$req_localip:80 localhost.run)
+				# ssh -R 80:$req_localip:80 localhost.run 
+				nohup ssh -R 80:localhost:20211 localhost.run &
 				lhr_pid=$!
+				lhr_url= $(more nohup.out | awk 'END{print}')
 				[[ $debug == true ]] && echo "url: "$lhr_url
 				[[ $debug == true ]] && echo "pid: "$lhr_pid
-				mosquitto_pub -h $mqtt_server_url -p $mqtt_server_port -t $mqtt_topic -m $lhr_url
+				mosquitto_pub -h $mqtt_server_url -p $mqtt_server_port -t $mqtt_topic -m {"lhr_url":"$lhr_url"}
 			elif [[ "$req_action" == "close" ]]; then
-				kill $lhrpid
+				kill $lhr_pid
 			fi
 		#unknown service or empty key: nothing to do
 		else
