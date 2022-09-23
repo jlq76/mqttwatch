@@ -67,10 +67,8 @@ while :; do
 		elif [[ "$req_service" == "lhrun" ]]; then
 			if [[ "$req_action" == "open" ]]; then
 				[[ $debug == true ]] && echo "starting localhost.run tunnel"
-				#ssh options -f = fork in background, -N = run no command
-				#when using fN however, the url is not returned in the variable
-				#if not using it the ssh remains in foreground and block the script
-				# ssh -R 80:$req_localip:80 localhost.run 
+				#Ideally would use ssh options -f = fork in background, -N = run no command
+				#ssh session must be put in background otherwise blocks the rest of the script
 				nohup ssh -R 80:localhost:20211 localhost.run &
 				lhr_pid=$!
 				lhr_url=$(awk -F ', ' 'END{print $2}' nohup.out)
